@@ -11,6 +11,7 @@ import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.Surface
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -36,6 +37,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.krishnajeena.krishnasrestaurant.ui.theme.BookTableScreen
 import com.krishnajeena.krishnasrestaurant.ui.theme.HomeScreen
+import com.krishnajeena.krishnasrestaurant.ui.theme.KrishnaRestApp
 import com.krishnajeena.krishnasrestaurant.ui.theme.KrishnasRestaurantTheme
 
 class MainActivity : ComponentActivity() {
@@ -46,47 +48,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             KrishnasRestaurantTheme {
-                var selected by remember { mutableIntStateOf(1) }
-                var toShowBottom by remember{ mutableStateOf(true)}
-                //val navController = rememberNavController()
-
-    if(selected == 1) HomeScreen(modifier = Modifier)
-    else BookTableScreen()
+              Surface(modifier = Modifier.fillMaxSize()){
+                  KrishnaRestApp()
+              }
 }
             }
         }
-
-       // window.statusBarColor = android.graphics.Color.parseColor("#e6b800") // Orange color
-
-
-        // Set status bar icons to dark or light
-  //      WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = true
-
-//    }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CustomAppBar(
-    title: String,
-    onBackClick: () -> Unit
-) {
-    TopAppBar(
-        title = {
-            Text(text = title)
-        },
-        navigationIcon = {
-            IconButton(onClick = { onBackClick() }) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back"
-                )
-            }
-        },
-        modifier = Modifier.fillMaxWidth(),
-        backgroundColor =  Color.Yellow
-        ,
-        elevation = 4.dp
-    )
 }

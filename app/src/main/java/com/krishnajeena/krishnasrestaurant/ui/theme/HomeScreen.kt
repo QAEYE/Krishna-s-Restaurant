@@ -1,6 +1,7 @@
 package com.krishnajeena.krishnasrestaurant.ui.theme
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -33,6 +34,7 @@ import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
@@ -45,12 +47,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,10 +79,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.krishnajeena.krishnasrestaurant.R
-import com.krishnajeena.krishnasrestaurant.data.list1
-import com.krishnajeena.krishnasrestaurant.data.list2
-import com.krishnajeena.krishnasrestaurant.data.list3
+import com.krishnajeena.krishnasrestaurant.data.Dish
 
 enum class KrishnasScreen(){
     HomeScreen,
@@ -84,49 +91,12 @@ enum class KrishnasScreen(){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(modifier: Modifier,
+fun HomeScreen(modifier: Modifier = Modifier,
                navController: NavHostController = rememberNavController()
 ){
-   // val scroll = rememberScrollState()
-
-
-   // var expanded by remember { mutableStateOf(false) }
-
 
     var isExpanded by remember { mutableStateOf(false) }
 
-    //.currentBackStackEntryAsState()
-
-//    val animatedHeight by animateDpAsState(
-//        targetValue = if (isExpanded) 600.dp else 200.dp,
-//        animationSpec = tween(durationMillis = 800), label = ""
-//    )
-
-
-      //      if (isExpanded) {
-
-//                Scaffold(
-//                    topBar = {
-//                        TopAppBar(
-//                            colors = topAppBarColors(
-//                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-//                                titleContentColor = MaterialTheme.colorScheme.primary,
-//                            ),
-//                            title = {
-//                                Text("Krishna'S")
-//                            },
-//                            navigationIcon ={
-//                            IconButton(onClick = {navController.navigateUp()}) {
-//                                Icon(
-//                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-//                                    contentDescription = null
-//                                )
-//                            }
-//                            }
-//                        )
-//                    },
-//
-//                ){ innerPadding ->
 
 
                     NavHost(
@@ -141,7 +111,6 @@ fun HomeScreen(modifier: Modifier,
                             var selected by remember { mutableIntStateOf(1) }
 
                             Scaffold(
-
                                 bottomBar = {
 
                                     BottomNavigation(backgroundColor = Color.White){
@@ -167,18 +136,18 @@ fun HomeScreen(modifier: Modifier,
                             ) { innerPadding ->
 
 
-                                Column(modifier = Modifier.padding(innerPadding)
+                                Column(modifier = Modifier
+                                    .padding(innerPadding)
                                     .fillMaxSize()
-                                    //.verticalScroll(scroll)
                                 ) {
 
                                     if(selected == 1) {
 
-                                        HomeScreenTopPart(modifier = modifier.weight(1f))
-                                        HomeScreenBottomPart(
-                                            modifier = Modifier.weight(1f), isExpanded,
-                                            function = { navController.navigate(KrishnasScreen.HomeScreenSeeAll.toString()) }
-                                        )
+    HomeScreenTopPart(modifier = modifier.weight(1f))
+            HomeScreenBottomPart (
+            modifier = Modifier.weight(1f), isExpanded,
+    function = { navController.navigate(KrishnasScreen.HomeScreenSeeAll.toString())}) // },
+
 
                                     }
                                     else BookTableScreen()
@@ -211,32 +180,28 @@ fun HomeScreen(modifier: Modifier,
                         )
                     }
                             ) { innerPadding ->
+//
+//                                when(krishnaUiState){
+//                                    KrishnaUiState.Error -> {
+//                                        TODO()
+//                                    }
+//                                    KrishnaUiState.Loading -> TODO()
+//                                    is KrishnaUiState.Success -> {
 
-                            HomeScreenBottomPartFull(//animatedHeight,
-                                Modifier.padding(innerPadding),
-                                    isExpanded, onClose = {isExpanded = false})
+                                        HomeScreenBottomPartFull(//animatedHeight,
+                                            Modifier.padding(innerPadding),
+                                            //isExpanded,
+                                            onClose = {isExpanded = false},
+                                        //    data = krishnaUiState.data
+                                        )
+//                                    }
+                             //   }
+
+
+
+
                             }
                         }
-
-
-
-
-            //        }
-
-
-
-
-//                HomeScreenBottomPartFull(animatedHeight, Modifier  //. height(animatedHeight)
-//                    .padding(innerPadding), isExpanded, onClose = {
-//                    isExpanded = false
-//                })
-//
-//
-             //   }
-
-
-
-         ////
 
             }
 
@@ -333,9 +298,13 @@ fun HomeScreenTopPart(modifier: Modifier){
 }
 
 @Composable
-fun HomeScreenBottomPart(modifier: Modifier, isExpanded: Boolean, function: () -> Unit){
+fun HomeScreenBottomPart(modifier: Modifier, isExpanded: Boolean, function: () -> Unit,
+//                         data : List<Dish>
+){
 
     val scroll = rememberScrollState()
+
+
 
     val context = LocalContext.current
 
@@ -350,7 +319,8 @@ fun HomeScreenBottomPart(modifier: Modifier, isExpanded: Boolean, function: () -
                     .weight(1.5f)
                     .padding(start = 10.dp))
            Spacer(modifier = Modifier.weight(2f))
-            Text(text = "See all", modifier = Modifier.weight(1f)
+            Text(text = "See all", modifier = Modifier
+                .weight(1f)
                 .clickable {
                     function.invoke()
                 }
@@ -358,11 +328,27 @@ fun HomeScreenBottomPart(modifier: Modifier, isExpanded: Boolean, function: () -
                 textAlign = TextAlign.Center)
         }
 
-        var selectedIndex by remember { mutableStateOf(1) }
+        var selectedIndex by rememberSaveable { mutableStateOf(1) }
 
+        val homeViewModel: HomeViewModel = //key(selectedIndex) {
+            viewModel(factory = HomeViewModel.Factory)
+        //}
+        val krishnaUiState = homeViewModel.krishnaUiState
 
-        var list by remember{ mutableStateOf(list1)
+        var data by remember{mutableStateOf(listOf(Dish()))}
+
+        when(krishnaUiState) {
+            is KrishnaUiState.Success -> {
+                data = krishnaUiState.data
+
+            }
+
+            KrishnaUiState.Error -> EmptyScreen()
+            KrishnaUiState.Loading -> EmptyScreen()
         }
+
+//        var list by rememberSaveable{ mutableStateOf(viewModel.getDishStateList())
+//        }
 
         Row(modifier = Modifier
             .fillMaxWidth()
@@ -370,24 +356,36 @@ fun HomeScreenBottomPart(modifier: Modifier, isExpanded: Boolean, function: () -
             Text("Breakfast", modifier = Modifier
                 .weight(1f)
                 .clickable {
-                    list = list1
-                selectedIndex = 1
+                    //homeViewModel.dataT = 1
+Log.i("AAAF!!!!!!!!", "First 1")
+                    selectedIndex = 1
+                    homeViewModel.getDishStateList(1)
                 },
                 fontWeight = if(selectedIndex == 1) FontWeight.Bold else FontWeight.Normal,
                 textAlign = TextAlign.Center)
             Text("Lunch", modifier = Modifier
                 .weight(1f)
                 .clickable {
-                    list = list2
+                    //     list = list2
+//                    viewModel.setDishtList(2)
+//                    list = viewModel.getDishStateList()
+                    //homeViewModel.dataT = 2
+                    Log.i("AAAF!!!!!!!!", "Second 2")
                     selectedIndex = 2
+                    homeViewModel.getDishStateList(2)
                 },
                 fontWeight = if(selectedIndex == 2) FontWeight.Bold else FontWeight.Normal,
                 textAlign = TextAlign.Center)
             Text("Dinner", modifier = Modifier
                 .weight(1f)
                 .clickable {
-                    list = list3
+                    //     list = list3
+//                    viewModel.setDishtList(3)
+//                    list = viewModel.getDishStateList()
+                   // homeViewModel.dataT = 3
+                    Log.i("AAAF!!!!!!!!", "Third 3")
                     selectedIndex = 3
+                    homeViewModel.getDishStateList(3)
                 },
                 fontWeight = if(selectedIndex == 3) FontWeight.Bold else FontWeight.Normal,
                 textAlign = TextAlign.Center)
@@ -396,7 +394,7 @@ fun HomeScreenBottomPart(modifier: Modifier, isExpanded: Boolean, function: () -
 
         LazyRow(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(list){
+            items(items = data){
                 item ->
                     ItemsScreen(item, context)
 
@@ -407,52 +405,85 @@ fun HomeScreenBottomPart(modifier: Modifier, isExpanded: Boolean, function: () -
 
     }
 
+@Composable
+fun EmptyScreen(){
+
+}
 
 @Composable
 fun HomeScreenBottomPartFull(
    // animatedHeight: Dp,
     modifier: Modifier,
-    isExpanded: Boolean,
-    onClose: () -> Unit
+   // isExpanded: Boolean,
+    onClose: () -> Unit,
+   // data : List<Dish>
 ){
 
    // if (isExpanded) {
-        Box(modifier = modifier.fillMaxSize()
+        Box(modifier = modifier
+            .fillMaxSize()
             .padding(top = 5.dp)
             ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 // Top part with categories
 
-                var selectedIndex by remember { mutableStateOf(1) }
+                var selectedIndex by rememberSaveable { mutableStateOf(1) }
+
+                val homeViewModel: HomeViewModel = //key(selectedIndex) {
+                    viewModel(factory = HomeViewModel.Factory)
+                //}
+                val krishnaUiState = homeViewModel.krishnaUiState
+
+                var data by remember{mutableStateOf(listOf(Dish()))}
+
+                when(krishnaUiState) {
+                    is KrishnaUiState.Success -> {
+                        data = krishnaUiState.data
+
+                    }
+
+                    KrishnaUiState.Error -> EmptyScreen()
+                    KrishnaUiState.Loading -> EmptyScreen()
+                }
 
                 val context = LocalContext.current
-                var list by remember{ mutableStateOf(list1)
-                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "Breakfast", modifier = Modifier.padding(top = 0.dp,
-                        start = 8.dp)
-                        .clickable {    list = list1
+                    Text(text = "Breakfast", modifier = Modifier
+                        .padding(
+                            top = 0.dp,
+                            start = 8.dp
+                        )
+                        .clickable {
                             selectedIndex = 1
+                            homeViewModel.getDishStateList(selectedIndex)
                         },
                         fontWeight = if(selectedIndex == 1) FontWeight.Bold else FontWeight.Normal,)
 
-                    Text(text = "Lunch", modifier = Modifier.padding(top = 0.dp)
-                        .clickable {   list = list2
+                    Text(text = "Lunch", modifier = Modifier
+                        .padding(top = 0.dp)
+                        .clickable {
                             selectedIndex = 2
+                            homeViewModel.getDishStateList(selectedIndex)
                         },
                         fontWeight = if(selectedIndex == 2) FontWeight.Bold else FontWeight.Normal,)
 
-                    Text(text = "Dinner", modifier = Modifier.padding(top = 0.dp,
-                        end = 8.dp)
-                        .clickable {   list = list3
+                    Text(text = "Dinner", modifier = Modifier
+                        .padding(
+                            top = 0.dp,
+                            end = 8.dp
+                        )
+                        .clickable {
                             selectedIndex = 3
+                            homeViewModel.getDishStateList(selectedIndex)
                         },
                         fontWeight = if(selectedIndex == 3) FontWeight.Bold else FontWeight.Normal,)
                 }
+
+
 
 
                 // Selected category dishes
@@ -461,7 +492,7 @@ fun HomeScreenBottomPartFull(
                     modifier = Modifier.padding(4.dp),
                     contentPadding = PaddingValues(2.dp)
                 ) {
-                    items(list) { dish ->
+                    items(data) { dish ->
                         // Display each dish in a vertical list
                         ItemsScreen(dish, context)
                     }
@@ -476,24 +507,20 @@ fun HomeScreenBottomPartFull(
     //}
 
 }
-//
-//@Preview(showBackground = true, showSystemUi = true)
-//@Composable
-//fun PreviewHome(){
-//    HomeScreenBottomPartFull(true, {})
-//}
+
 
 @Composable
-fun ItemsScreen(pair: Triple<String, String, Int>, context: Context){
+fun ItemsScreen(pair: Dish, context: Context){
 
     Card(modifier = Modifier
         .padding(16.dp)
         .width(180.dp)
         .wrapContentHeight()
         .clickable {
-            Toast.makeText(context, "Baklol karte rho!", Toast.LENGTH_LONG).show()
 
-          //  show
+            Toast
+                .makeText(context, "Baklol karte rho!", Toast.LENGTH_LONG)
+                .show()
 
         },
         shape = RoundedCornerShape(16.dp),
@@ -502,22 +529,27 @@ fun ItemsScreen(pair: Triple<String, String, Int>, context: Context){
     ) {
 
         Column(modifier = Modifier.fillMaxWidth()) {
+          AsyncImage(model = ImageRequest.Builder(context = LocalContext.current)
+                .data(pair.image)
+                .build(),
+                placeholder = painterResource(R.drawable.vecteezy_vector_loading_icon_template_black_color_editable_vector_6692205),
+                error = painterResource(R.drawable.icons8_broken_image_48),
 
-            Image(painter = painterResource(pair.third),
-                modifier = Modifier
-                    .size(190.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .align(Alignment.End)
-                    .offset(x = (40).dp),
                 contentScale = ContentScale.Crop,
-                contentDescription = null)
+                contentDescription = null,
+                modifier = Modifier
+                    .size(180.dp)
+                    .clip(RoundedCornerShape(8.dp))
+
+                    ,
+                )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Column(modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.Center){
 
-            Text(text = pair.first,
+            Text(text = pair.name,
                 fontSize = 18.sp,
                 textAlign = TextAlign.Start,
                 maxLines = 1,
@@ -527,7 +559,7 @@ fun ItemsScreen(pair: Triple<String, String, Int>, context: Context){
             )
 
                 Spacer(modifier = Modifier.height(5.dp))
-            Text(text = pair.second,
+            Text(text = pair.price,
                 fontSize = 18.sp,
                 textAlign = TextAlign.End,
                 fontWeight = FontWeight.Bold

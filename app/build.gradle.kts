@@ -1,12 +1,13 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.20"
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
     namespace = "com.krishnajeena.krishnasrestaurant"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.krishnajeena.krishnasrestaurant"
@@ -61,6 +62,9 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.firebase.auth)
+    implementation(libs.googleid)
+    implementation(libs.play.services.base)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -87,5 +91,15 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
 // Kotlin serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+implementation("com.google.android.gms:play-services-auth:21.2.0")
 
+    // Declare the dependency for the Firebase Authentication library
+    implementation("androidx.credentials:credentials:1.5.0-alpha05")
+
+    // optional - needed for credentials support from play services, for devices running
+    // Android 13 and below.
+    implementation("androidx.credentials:credentials-play-services-auth:1.5.0-alpha05")
+    implementation ("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 }

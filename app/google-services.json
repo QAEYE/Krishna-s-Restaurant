@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "18745781767",
+    "project_id": "k-s-restaurant",
+    "storage_bucket": "k-s-restaurant.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:18745781767:android:6d2cc5c1b9b2347f7e04a2",
+        "android_client_info": {
+          "package_name": "com.krishnajeena.krishnasrestaurant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "18745781767-ql4dr0290vlh7he10tnav5i3fdl581nh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.krishnajeena.krishnasrestaurant",
+            "certificate_hash": "4289947c12188ffd11d4b8945eadbf60419bc2da"
+          }
+        },
+        {
+          "client_id": "18745781767-7ihri56hc4dam2v4cge8l4i79da3qv8p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqv2GU5WA--e-EHnh-9SovA0ZusC5vScw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "18745781767-7ihri56hc4dam2v4cge8l4i79da3qv8p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

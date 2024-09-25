@@ -3,8 +3,6 @@ package com.krishnajeena.krishnasrestaurant.ui.theme
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +14,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -36,9 +33,9 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -47,13 +44,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,16 +64,15 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.krishnajeena.krishnasrestaurant.ItemDetailsScreen
 import com.krishnajeena.krishnasrestaurant.R
 import com.krishnajeena.krishnasrestaurant.data.Dish
 
@@ -92,7 +84,7 @@ enum class KrishnasScreen(){
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier,
-               navController: NavHostController = rememberNavController()
+               navController: NavHostController
 ){
 
     var isExpanded by remember { mutableStateOf(false) }
@@ -146,7 +138,8 @@ fun HomeScreen(modifier: Modifier = Modifier,
     HomeScreenTopPart(modifier = modifier.weight(1f))
             HomeScreenBottomPart (
             modifier = Modifier.weight(1f), isExpanded,
-    function = { navController.navigate(KrishnasScreen.HomeScreenSeeAll.toString())}) // },
+    function = { navController.navigate(KrishnasScreen.HomeScreenSeeAll.toString())},
+                itemScreenFunction = { navController.navigate("itemDetails")}) // },
 
 
                                     }
@@ -192,6 +185,9 @@ fun HomeScreen(modifier: Modifier = Modifier,
                                             Modifier.padding(innerPadding),
                                             //isExpanded,
                                             onClose = {isExpanded = false},
+
+                                            itemScreenFunction = { navController.navigate("itemDetails")}
+
                                         //    data = krishnaUiState.data
                                         )
 //                                    }
@@ -221,7 +217,12 @@ fun HomeScreenTopPart(modifier: Modifier){
 
     Column(modifier= Modifier.fillMaxWidth()
     ){
-       Row(modifier = Modifier.fillMaxWidth()
+
+        Row(modifier = Modifier.fillMaxWidth().padding(start = 10.dp,
+            end = 5.dp),
+            verticalAlignment = Alignment.CenterVertically
+            , horizontalArrangement = Arrangement.SpaceBetween) {
+       Row(modifier = Modifier
        , verticalAlignment = Alignment.CenterVertically){
         Text(text = "Hi, ", color = Color.White, fontSize = 20.sp,
             textAlign = TextAlign.Center,modifier = Modifier
@@ -232,6 +233,12 @@ fun HomeScreenTopPart(modifier: Modifier){
                textAlign = TextAlign.Center,
                fontSize = 22.sp, fontWeight = FontWeight.Bold, modifier = Modifier
                .padding(start = 10.dp, top = 8.dp, end = 0.dp, bottom = 5.dp))
+       }
+
+           IconButton(onClick = {}, modifier = Modifier) {
+               Icon(imageVector = Icons.Filled.ShoppingCart, tint = Color.White, contentDescription = null)
+
+       }
        }
         Row(modifier = Modifier
             .fillMaxWidth()
@@ -298,7 +305,8 @@ fun HomeScreenTopPart(modifier: Modifier){
 }
 
 @Composable
-fun HomeScreenBottomPart(modifier: Modifier, isExpanded: Boolean, function: () -> Unit,
+fun HomeScreenBottomPart(
+    modifier: Modifier, isExpanded: Boolean, function: () -> Unit, itemScreenFunction: () -> Unit,
 //                         data : List<Dish>
 ){
 
@@ -396,7 +404,7 @@ Log.i("AAAF!!!!!!!!", "First 1")
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items(items = data){
                 item ->
-                    ItemsScreen(item, context)
+                    ItemsScreen(item, context, itemScreenFunction)
 
             }
         }
@@ -416,6 +424,7 @@ fun HomeScreenBottomPartFull(
     modifier: Modifier,
    // isExpanded: Boolean,
     onClose: () -> Unit,
+    itemScreenFunction: () -> Unit,
    // data : List<Dish>
 ){
 
@@ -494,7 +503,7 @@ fun HomeScreenBottomPartFull(
                 ) {
                     items(data) { dish ->
                         // Display each dish in a vertical list
-                        ItemsScreen(dish, context)
+                        ItemsScreen(dish, context, itemScreenFunction)
                     }
                 }
 
@@ -510,68 +519,87 @@ fun HomeScreenBottomPartFull(
 
 
 @Composable
-fun ItemsScreen(pair: Dish, context: Context){
+fun ItemsScreen(pair: Dish, context: Context, itemScreenFunction: () -> Unit){
 
-    Card(modifier = Modifier
-        .padding(16.dp)
-        .width(180.dp)
-        .wrapContentHeight()
-        .clickable {
+ //   val controller = rememberNavController()
 
-            Toast
-                .makeText(context, "Baklol karte rho!", Toast.LENGTH_LONG)
-                .show()
+    var currentDish : Dish by remember { mutableStateOf(pair) }
+//    NavHost(navController = controller, startDestination = "itemDish"){
+//
+//
+//        composable("itemDish"){
 
-        },
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.elevatedCardElevation(4.dp),
+            Card(modifier = Modifier
+                .padding(16.dp)
+                .width(180.dp)
+                .wrapContentHeight()
+                .clickable {
 
-    ) {
 
-        Column(modifier = Modifier.fillMaxWidth()) {
-          AsyncImage(model = ImageRequest.Builder(context = LocalContext.current)
-                .data(pair.image)
-                .build(),
-                placeholder = painterResource(R.drawable.vecteezy_vector_loading_icon_template_black_color_editable_vector_6692205),
-                error = painterResource(R.drawable.icons8_broken_image_48),
+                    Toast
+                        .makeText(context, "Baklol karte rho!", Toast.LENGTH_LONG)
+                        .show()
 
-                contentScale = ContentScale.Crop,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(180.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    itemScreenFunction.invoke()
 
-                    ,
-                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                },
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.elevatedCardElevation(4.dp),
 
-            Column(modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.Center){
+                ) {
 
-            Text(text = pair.name,
-                fontSize = 18.sp,
-                textAlign = TextAlign.Start,
-                maxLines = 1,
-                softWrap = true,
-                fontWeight = FontWeight.Bold
-                ,modifier = Modifier.padding(start = 8.dp, end = 8.dp)
-            )
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    AsyncImage(model = ImageRequest.Builder(context = LocalContext.current)
+                        .data(pair.image)
+                        .build(),
+                        placeholder = painterResource(R.drawable.vecteezy_vector_loading_icon_template_black_color_editable_vector_6692205),
+                        error = painterResource(R.drawable.icons8_broken_image_48),
 
-                Spacer(modifier = Modifier.height(5.dp))
-            Text(text = pair.price,
-                fontSize = 18.sp,
-                textAlign = TextAlign.End,
-                fontWeight = FontWeight.Bold
-                ,modifier = Modifier.padding(start = 8.dp,
-                    end = 8.dp)
-            )
+                        contentScale = ContentScale.Crop,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(180.dp)
+                            .clip(RoundedCornerShape(8.dp)))
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Column(modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.Center){
+
+                        Text(text = pair.name,
+                            fontSize = 18.sp,
+                            textAlign = TextAlign.Start,
+                            maxLines = 1,
+                            softWrap = true,
+                            fontWeight = FontWeight.Bold
+                            ,modifier = Modifier.padding(start = 8.dp, end = 8.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(5.dp))
+                        Text(text = pair.price,
+                            fontSize = 18.sp,
+                            textAlign = TextAlign.End,
+                            fontWeight = FontWeight.Bold
+                            ,modifier = Modifier.padding(start = 8.dp,
+                                end = 8.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
             }
-            Spacer(modifier = Modifier.height(8.dp))
-        }
+
+
+//        }
+//
+//        composable("detailsScreen"){
+//
+//            ItemDetailsScreen(modifier = Modifier.fillMaxSize(), currentDish)
+//
+//        }
 
     }
 
-}
 
 

@@ -47,7 +47,7 @@ class HomeViewModel(private val krishnaDataRepository: KrishnaDataRespository) :
             catch (e : IOException){
                 KrishnaUiState.Error
             }
-            catch (e : HttpException){
+            catch (e : Throwable){
                 KrishnaUiState.Error
             }
 

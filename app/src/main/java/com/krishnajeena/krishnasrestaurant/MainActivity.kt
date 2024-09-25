@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
@@ -43,13 +44,14 @@ import com.krishnajeena.krishnasrestaurant.ui.theme.KrishnasRestaurantTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             KrishnasRestaurantTheme {
               Surface(modifier = Modifier.fillMaxSize()){
-                  KrishnaRestApp()
+                  KrishnaRestApp(this)
               }
 }
             }

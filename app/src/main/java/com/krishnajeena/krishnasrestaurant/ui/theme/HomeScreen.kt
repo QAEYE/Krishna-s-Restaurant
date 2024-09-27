@@ -35,6 +35,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -84,13 +85,13 @@ enum class KrishnasScreen(){
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier,
-               navController: NavHostController
+               navController1: NavHostController
 ){
 
     var isExpanded by remember { mutableStateOf(false) }
 
 
-
+val navController = rememberNavController()
                     NavHost(
                         navController = navController,
                         startDestination = KrishnasScreen.HomeScreen.toString(),
@@ -135,11 +136,11 @@ fun HomeScreen(modifier: Modifier = Modifier,
 
                                     if(selected == 1) {
 
-    HomeScreenTopPart(modifier = modifier.weight(1f))
+    HomeScreenTopPart(modifier = modifier.weight(1f), navController1)
             HomeScreenBottomPart (
             modifier = Modifier.weight(1f), isExpanded,
     function = { navController.navigate(KrishnasScreen.HomeScreenSeeAll.toString())},
-                itemScreenFunction = { navController.navigate("itemDetails")}) // },
+                itemScreenFunction = { navController1.navigate("itemDetails")}) // },
 
 
                                     }
@@ -186,7 +187,7 @@ fun HomeScreen(modifier: Modifier = Modifier,
                                             //isExpanded,
                                             onClose = {isExpanded = false},
 
-                                            itemScreenFunction = { navController.navigate("itemDetails")}
+                                            itemScreenFunction = { navController1.navigate("itemDetails")}
 
                                         //    data = krishnaUiState.data
                                         )
@@ -207,7 +208,7 @@ fun HomeScreen(modifier: Modifier = Modifier,
 
 
 @Composable
-fun HomeScreenTopPart(modifier: Modifier){
+fun HomeScreenTopPart(modifier: Modifier, navController1: NavHostController){
 
     Box(modifier = modifier.fillMaxWidth()){
         Image(painter = painterResource(R.drawable.wave), modifier = Modifier.fillMaxWidth()
@@ -234,11 +235,15 @@ fun HomeScreenTopPart(modifier: Modifier){
                fontSize = 22.sp, fontWeight = FontWeight.Bold, modifier = Modifier
                .padding(start = 10.dp, top = 8.dp, end = 0.dp, bottom = 5.dp))
        }
-
+Row(modifier= Modifier){
            IconButton(onClick = {}, modifier = Modifier) {
                Icon(imageVector = Icons.Filled.ShoppingCart, tint = Color.White, contentDescription = null)
 
        }
+            IconButton(onClick = {navController1.navigate("myprofile")}, modifier = Modifier) {
+                Icon(imageVector = Icons.Filled.Person, tint = Color.White, contentDescription = null)
+            }
+}
        }
         Row(modifier = Modifier
             .fillMaxWidth()
@@ -312,8 +317,6 @@ fun HomeScreenBottomPart(
 
     val scroll = rememberScrollState()
 
-
-
     val context = LocalContext.current
 
     Column(modifier = modifier
@@ -353,6 +356,7 @@ fun HomeScreenBottomPart(
 
             KrishnaUiState.Error -> EmptyScreen()
             KrishnaUiState.Loading -> EmptyScreen()
+            else -> Unit
         }
 
 //        var list by rememberSaveable{ mutableStateOf(viewModel.getDishStateList())
@@ -453,6 +457,7 @@ fun HomeScreenBottomPartFull(
 
                     KrishnaUiState.Error -> EmptyScreen()
                     KrishnaUiState.Loading -> EmptyScreen()
+                    else -> Unit
                 }
 
                 val context = LocalContext.current

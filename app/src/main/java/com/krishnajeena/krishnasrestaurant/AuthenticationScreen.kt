@@ -44,54 +44,23 @@ import androidx.credentials.GetCredentialResponse
 import androidx.credentials.PasswordCredential
 import androidx.credentials.PublicKeyCredential
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.krishnajeena.krishnasrestaurant.model.AuthEmailViewModel
+import com.krishnajeena.krishnasrestaurant.model.AuthGuestSignInViewModel
 import com.krishnajeena.krishnasrestaurant.model.AuthState
-import kotlinx.coroutines.CoroutineScope
-
-
-@Composable
-fun AuthenticationScreen(navController: NavHostController, context: Context, coroutineScope: CoroutineScope) {
-
-    val navCon = rememberNavController()
-
-    NavHost(navCon,"SignUp"){
-
-        composable("SignUp"){
-
-            SignUpScreen(navCon, navController , context, coroutineScope)
-
-        }
-
-        composable("NewAccount"){
-
-            CreateNewAccount(navCon, navController, authEmailViewModel = AuthEmailViewModel())
-
-        }
-
-        composable("SignIn"){
-
-            SignInScreen(navCon)
-
-        }
-
-
-    }
-
-
-}
+import com.krishnajeena.krishnasrestaurant.model.GuestSignInState
 
 
 
 @Composable
-fun SignUpScreen(navController: NavHostController, navCon: NavHostController,
-                 context: Context, coroutineScope: CoroutineScope) {
+fun SignUpScreen(
+    navController: NavHostController,
+    context: Context,
+    //authguestViewModel: AuthGuestSignInViewModel
+) {
 
     Column(modifier = Modifier.fillMaxSize().padding(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -125,12 +94,10 @@ Column( horizontalAlignment = Alignment.CenterHorizontally,){
 
         }
 
-
-
         OutlinedButton(onClick ={
 
             val googleSignInViewModel = GoogleSignInViewModel()
-            googleSignInViewModel.handleGoogleSignIn(context, navCon)
+            googleSignInViewModel.handleGoogleSignIn(context, navController)
 
         }, modifier = Modifier.width(260.dp)) {
 
@@ -150,8 +117,6 @@ Column( horizontalAlignment = Alignment.CenterHorizontally,){
                 tint = Color.Unspecified,
                 contentDescription = null)
             Text("Sign Up with X")
-
-
 
         }
         }
@@ -184,10 +149,20 @@ Divider(modifier = Modifier.width(140.dp)
                 }, color = Color(0xFFFF5621), fontWeight = FontWeight.Bold)
             }
 
+//            val authGuestSignInState = authguestViewModel.authState.observeAsState()
+//
+//            LaunchedEffect(authGuestSignInState) {
+//                when(authGuestSignInState.value){
+//                    GuestSignInState.Success -> navController.navigate("SignUp")
+//                    else -> Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show()
+//                }
+//            }
             Row(modifier = Modifier.align(Alignment.CenterHorizontally)){
                 Text("Enter as guest!",
                     fontSize = 14.sp, modifier = Modifier
                         .clickable {
+
+                         //  val authguestViewModel = AuthGuestSignInViewModel()
                             Firebase.auth.signInAnonymously()
                                 .addOnCompleteListener(){
                                     task ->
@@ -195,11 +170,14 @@ Divider(modifier = Modifier.width(140.dp)
                                         // Sign in success, update UI with the signed-in user's information
                                         Log.d(TAG, "signInAnonymously:success")
                                         //val user = auth.currentUser
-                                        navCon.navigate("main")
+                                        navController.navigate("main")
+                                    //    authguestViewModel.guestSuccess()
+
                                       //  updateUI(user)
                                     } else {
                                         // If sign in fails, display a message to the user.
                                         Log.w(TAG, "signInAnonymously:failure", task.exception)
+                                   //     authguestViewModel.guestFailure()
                                         Toast.makeText(
                                             context,
                                             "Authentication failed.",
@@ -215,6 +193,7 @@ Divider(modifier = Modifier.width(140.dp)
     }
 
 }
+
 
 fun handleSignIn(result: GetCredentialResponse) {
     // Handle the successfully returned credential.
@@ -269,69 +248,27 @@ fun handleSignIn(result: GetCredentialResponse) {
     }
 }
 
-@Composable
-fun CreateNewAccount(
-    navController: NavHostController,
-    navController1: NavHostController,
-    authEmailViewModel: AuthEmailViewModel,
-
-){
-Scaffold(modifier = Modifier) {
-    innerPadding->
-
-    val context = LocalContext.current
-    var email by remember{mutableStateOf("")}
-    var password by remember{mutableStateOf("")}
-
-    val authState = authEmailViewModel.authState.observeAsState()
-    LaunchedEffect(authState) {
-        when(authState.value)
-        {
-            is AuthState.Authenticated -> navController1.navigate("main")
-            is AuthState.Error -> Toast.makeText(context, (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT).show()
-            else -> Unit
-        }
-    }
-
-    Column(modifier = Modifier.fillMaxSize().padding(innerPadding),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally){
-        Text("Create new account", fontSize = 20.sp)
-        Spacer(modifier = Modifier.height(10.dp))
-        OutlinedTextField(value = email,
-            onValueChange = {email=it},
-            label = {Text("Enter your email address")}
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(value = password,
-            onValueChange = {password=it},
-            label = {Text("Enter a password")}
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedButton(onClick = {
-            authEmailViewModel.signup(email, password)
-        }) {
-            Text("Sign Up")
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-
-        TextButton(onClick = {navController.navigate("SignIn")}) {
-            Text("Already have an account?")
-        }
-
-    }
-}
-}
 
 @Composable
-fun SignInScreen(navController: NavHostController){
+fun SignInScreen(navController: NavHostController,
+                 authEmailViewModel: AuthEmailViewModel){
     Scaffold(modifier = Modifier) {
             innerPadding->
 
+        val context = LocalContext.current
         var email by remember{mutableStateOf("")}
         var password by remember{mutableStateOf("")}
+
+        val authState = authEmailViewModel.authState.observeAsState()
+        LaunchedEffect(authState.value) {
+            when(authState.value)
+            {
+                is AuthState.Authenticated -> navController.navigate("main")
+                is AuthState.Error -> Toast.makeText(context, (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT).show()
+                else -> Unit
+            }
+        }
+
 
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding),
             verticalArrangement = Arrangement.Center,
@@ -350,7 +287,7 @@ fun SignInScreen(navController: NavHostController){
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedButton(onClick = {}) {
+            OutlinedButton(onClick = {authEmailViewModel.login(email, password)}) {
                 Text("Sign In")
             }
             Spacer(modifier = Modifier.height(8.dp))

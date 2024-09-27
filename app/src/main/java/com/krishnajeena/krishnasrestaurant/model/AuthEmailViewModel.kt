@@ -1,5 +1,6 @@
 package com.krishnajeena.krishnasrestaurant.model
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -56,8 +57,10 @@ _authState.value = AuthState.Authenticated
                     task ->
                 if(task.isSuccessful){
                     _authState.value = AuthState.Authenticated
+                    Log.i("TAG::", "Task is successful")
                 }
                 else {
+                    Log.i("TAG::", "Task is not successful ${task.result}")
                     _authState.value = AuthState.Error(task.exception?.message?:"Something went wrong")
                 }
             }

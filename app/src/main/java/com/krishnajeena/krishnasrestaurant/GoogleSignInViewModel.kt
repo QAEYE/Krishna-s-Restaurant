@@ -51,7 +51,7 @@ class GoogleSignInViewModel: ViewModel() {
                     onFailure = {
                         e->
                         Toast.makeText(context,
-                            "Something went wrong",
+                            "$e Something went wrong",
                             Toast.LENGTH_LONG).show()
                     }
                 )
